@@ -1,0 +1,101 @@
+spring:
+  application:
+    name: Observability-service
+  profiles:
+    active: dev
+#  batch:
+#    jdbc:
+#      initialize-schema: always
+#  sql:
+#    init:
+#      mode: always # Spring Boot >=v2.5.0
+#      platform: h2 # Spring Boot <v2.5.0
+#  datasource:
+#    driverClassName: com.mysql.cj.jdbc.Driver
+#    url: jdbc:mysql://localhost:3306/db?useSSL=false&useLegacyDatetimeCode=false&allowPublicKeyRetrieval=true
+#    username: user
+#    password: password
+#  #    initialization-mode: always # Spring Boot <v2.5.0
+#  #    platform: h2 # Spring Boot <v2.5.0
+#  jpa:
+#    hibernate:
+#      ddl-auto: create # When you launch the application for the first time - switch "none" at "create"
+#    show-sql: true
+#    database: mysql
+#    database-platform: org.hibernate.dialect.MySQL8Dialect
+#    #    open-in-view: false
+#    generate-ddl: false
+#    defer-datasource-initialization: false
+#  flyway:
+#    enabled: true
+#    baseline-on-migrate: true
+#    validateOnMigrate: false
+#    locations: "classpath:db/migration"
+#  h2:
+#    console:
+#      enabled: true
+#      path: /h2-console
+#      settings.trace: false
+#      settings.web-allow-others: false
+
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driverClassName: org.h2.Driver
+    username: admin
+    password: admin
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    #database-platform: org.hibernate.dialect.H2Dialect
+    spring.jpa.database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings.trace: false
+      settings.web-allow-others: false
+  flyway:
+    enabled: true
+    locations:
+      - classpath:db/migration
+
+telemetry:
+  sdk:
+    language: java
+    name: opentelemetry
+    version: 1.29.0
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4318/v1/metrics
+        step: 10s
+    tracing:
+      endpoint: http://localhost:4318/v1/traces
+  tracing:
+    sampling:
+      probability: 1.0
+  metrics:
+    distribution:
+      percentiles:
+        do.sleep.method.timed: 0.99, 0.95, 0.9, 0.7, 0.5
+        http.server.requests: 0.99, 0.95, 0.9, 0.7, 0.5
+      percentiles-histogram:
+        do.sleep.method.timed: true
+        http.server.requests: true
+      minimum-expected-value:
+        do.sleep.method.timed: 100ms
+        http.server.requests: 100ms
+      maximum-expected-value:
+        do.sleep.method.timed: 10s
+        http.server.requests: 10s
+      slo:
+        do.sleep.method.timed: 300ms,500ms,1s,2s
+        http.server.requests: 300ms,500ms,1s,2s
